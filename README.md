@@ -1,134 +1,112 @@
-¡Perfecto! 🚀 Te dejo un **README.md** inicial, bien organizado, para tu proyecto.
+---
+
+# 🧾 DTE Bot – Descarga, ZIP y envío de facturas electrónicas
+
+Este proyecto automatiza la descarga de facturas (DTE) desde Gmail, las organiza por rango de fechas, genera un CSV, comprimo en ZIP y puedo enviarlas por correo a la contadora. Incluye CLI y una UI sencilla en Streamlit.
 
 ---
 
-```markdown
-# 🧾 DTE Bot – Descarga, ZIP y Envío de Facturas Electrónicas
-
-Este proyecto automatiza la descarga de facturas electrónicas (DTE) desde Gmail, las organiza en carpetas por rango de fechas, genera un reporte CSV, comprime los archivos en un ZIP y opcionalmente los envía por correo a la contadora.
+## 🧰 Qué hace
+- Busca correos con adjuntos PDF/JSON usando palabras clave y rango de fechas.
+- Deduplica adjuntos (estado en `data/state/processed.jsonl` y hashes por lote).
+- Guarda PDFs/JSON en subcarpetas por correo y arma `reporte.csv`.
+- Genera un ZIP del lote y, si quiero, lo envía por Gmail.
 
 ---
 
-## 📂 Estructura del proyecto
-
+## 📂 Estructura
 ```
-
 facturas-bot/
 │─ src/
-│   ├─ main.py               # Punto de entrada (CLI)
-│   ├─ gmail\_client.py       # Conexión Gmail API (buscar, leer, descargar)
-│   ├─ filters.py            # Construcción de queries Gmail
-│   ├─ storage.py            # Guardado en disco, CSV y ZIP
-│   ├─ mailer.py             # Envío de correo con adjuntos
-│   └─ logging\_conf.py       # Configuración de logs
+│   ├─ main.py            # CLI principal
+│   ├─ gmail_client.py    # Gmail API (buscar, leer, descargar)
+│   ├─ filters.py         # Construcción de queries Gmail
+│   ├─ storage.py         # Guardado en disco, CSV y ZIP
+│   ├─ mailer.py          # Envío de correo con adjuntos
+│   └─ logging_conf.py    # Configuración de logs
 │
 │─ config/
-│   ├─ config.yaml           # Configuración general (keywords, label, etc.)
+│   ├─ config.yaml        # Keywords, label opcional, paths
 │   └─ credentials/
-│       ├─ credentials.json  # Clave OAuth (descargada de Google Cloud)
-│       └─ token.pickle      # Token de autenticación (se genera solo)
+│       ├─ credentials.json  # Clave OAuth (Google Cloud)
+│       └─ token.pickle      # Token que se genera solo
 │
 │─ data/
-│   ├─ downloads/            # PDFs descargados por rango
-│   └─ out/                  # ZIPs generados
+│   ├─ downloads/         # PDFs/JSON por rango
+│   └─ out/               # ZIPs generados
 │
-│─ ui\_app.py                 # Interfaz sencilla en Streamlit
-│─ requirements.txt          # Dependencias del proyecto
-│─ .env                      # Variables (ej: correo contadora)
+│─ ui_app.py              # Interfaz Streamlit
+│─ requirements.txt       # Dependencias
+│─ .env                   # Variables (ej: correo contadora)
 │─ README.md
+```
 
-````
+---
+
+## 🔧 Requisitos
+- Python 3.x
+- Credenciales OAuth de Gmail (Desktop) habilitando Gmail API.
+- Entorno virtual recomendado.
 
 ---
 
 ## ⚙️ Instalación
-
-1. Clona este repo y entra a la carpeta:
-
 ```bash
 git clone <url>
 cd facturas-bot
-````
-
-2. Crea entorno virtual e instala dependencias:
-
-```bash
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-3. Configura credenciales de Google:
+---
 
-   * Crea un proyecto en Google Cloud.
-   * Habilita la **Gmail API**.
-   * Crea credenciales OAuth de tipo **Desktop app**.
-   * Descarga el JSON → guárdalo como:
+## 🔑 Configuración
+1) Credenciales: descarga el JSON de OAuth y guárdalo como `config/credentials/credentials.json`. El `token.pickle` se crea solo la primera vez que autorizo.
 
-     ```
-     config/credentials/credentials.json
-     ```
-
-4. Archivo `.env`:
-
+2) Variables de entorno (`.env`):
 ```env
 CONTADORA_EMAIL=contadora@tuempresa.com
 ```
 
+3) Ajustes en `config/config.yaml`: keywords, label opcional de Gmail, carpeta de salida, etc.
+
 ---
 
 ## 🚀 Uso por CLI
-
-### Dry run (solo listar y contar PDFs)
-
+- Dry run (solo listar y contar PDFs):
 ```bash
 python src/main.py --from 2025-08-01 --to 2025-08-31
 ```
-
-### Descargar PDFs + CSV
-
+- Descargar PDFs + CSV:
 ```bash
 python src/main.py --from 2025-08-01 --to 2025-08-31 --download
 ```
-
-### Descargar + crear ZIP
-
+- Descargar + ZIP:
 ```bash
 python src/main.py --from 2025-08-01 --to 2025-08-31 --download --zip
 ```
-
-### Descargar + ZIP + enviar a contadora
-
+- Descargar + ZIP + enviar a contadora:
 ```bash
 python src/main.py --from 2025-08-01 --to 2025-08-31 --download --zip --send
 ```
 
 ---
 
-## 🖥️ Uso con Interfaz (UI)
-
-Con **Streamlit** puedes usar una interfaz sencilla en el navegador:
-
+## 🖥️ Uso con UI (Streamlit)
 ```bash
 streamlit run ui_app.py
 ```
-
-* Selecciona rango de fechas.
-* Marca opciones: Descargar, Crear ZIP, Enviar a contadora.
-* (Opcional) Escribe una **Etiqueta de Gmail** para filtrar correos.
+Selecciono fechas, marco Descargar/ZIP/Enviar, y opcionalmente paso una etiqueta de Gmail para filtrar. La app muestra progreso, genera el CSV/ZIP y puede enviar el correo.
 
 ---
 
-## 📝 Notas importantes
+## 📝 Notas
+- Gmail bloquea adjuntos >25 MB. Si el ZIP pesa mucho, uso rangos más pequeños o evalúo subir a Drive y mandar link.
+- Los logs quedan en `logs/run_YYYY-MM-DD_HHMM.log`.
+- La deduplicación evita re-procesar adjuntos previos y dupes dentro del mismo lote.
 
-* Gmail bloquea adjuntos mayores a **25 MB**. Si tu ZIP se pasa de ese límite:
-
-  * Usa rangos de fechas más pequeños, o
-  * Modifica el proyecto para subir a Google Drive y enviar link (pendiente de implementar).
-* El campo **Etiqueta de Gmail (opcional)** permite filtrar solo correos que tengan esa etiqueta en tu inbox.
-* Los logs detallados se guardan en `logs/run_YYYY-MM-DD_HHMM.log`.
-
+---
 
 ## 👤 Autor
-
-Desarrollado para automatizar la gestión de facturas DTE y ahorrar tiempo en el proceso de descarga, organización y envío a la contadora.
+Armado para automatizar la gestión de facturas DTE y ahorrarme tiempo en descarga, organización y envío a la contadora.
