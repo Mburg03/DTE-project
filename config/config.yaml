@@ -1,0 +1,11 @@
+keywords:
+  - DTE
+  - Documento Tributario Electrónico
+  - Facturación electrónica
+  - Factura electrónica
+  - electrónica
+
+label: ""          # opcional: etiqueta de Gmail, ej: "Facturas"
+timezone: "America/El_Salvador"
+output_dir: "data"
+max_results: 100   # por página en búsqueda

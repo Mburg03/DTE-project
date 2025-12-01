@@ -1,0 +1,23 @@
+# Python cache/artifacts
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+
+# Virtual environments
+.venv/
+
+# Environment variables
+.env
+.env.*
+
+# Local data/logs
+data/
+logs/
+*.log
+
+# Credentials/tokens
+config/credentials/
+
+# OS / editor noise
+.DS_Store
